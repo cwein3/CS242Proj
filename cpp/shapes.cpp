@@ -70,22 +70,28 @@ public:
 
 /* randomly generate a list of shapes, then process this list and compute their areas */
 int main () {
-	vector<Shape*> shapes;
-	for (int i = 0; i < 1000; i++) {
-		int shape_type = rand() % 3 + 1;
-		if (shape_type == 1) {
-			shapes.push_back(new Square(1));
+	double avg_time = 0;	
+	for (int num_tests = 0; num_tests < 10; num_tests++) {
+		time_t start_time = time(0);
+		vector<Shape*> shapes;
+		for (int i = 0; i < 1000000; i++) {
+			int shape_type = rand() % 3 + 1;
+			if (shape_type == 1) {
+				shapes.push_back(new Square(1));
+			}
+			if (shape_type == 2) {
+				shapes.push_back(new Triangle(1));
+			}
+			if (shape_type == 3) {
+				shapes.push_back(new Hexagon(1));
+			}
 		}
-		if (shape_type == 2) {
-			shapes.push_back(new Triangle(1));
+		for (int i = 0; i < 1000000; i++) {
+			Shape* curr_shape = shapes[i];
+			delete curr_shape;
 		}
-		if (shape_type == 3) {
-			shapes.push_back(new Hexagon(1));
-		}
+		double time_passed = difftime(time(0), start_time);
+		avg_time = (avg_time*num_tests + time_passed)/(num_tests + 1);
 	}
-	for (int i = 0; i < 1000; i++) {
-		Shape* curr_shape = shapes[i];
-		cout << "Area: " << curr_shape->CalcArea() << " Perimeter: " << curr_shape->CalcPerimeter() << " Angle: " << curr_shape->CalcAngle() << endl;
-		delete curr_shape;
-	}
+	cout << "Avg time passed " << avg_time;
 }

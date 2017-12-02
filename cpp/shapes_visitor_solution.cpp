@@ -1,7 +1,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h> 
-#include <time.h>
 #include <vector>
 #include <iostream>
 #include <map>
@@ -13,6 +12,7 @@ class ShapeVisitor;
 class Square;
 class Triangle;
 class Hexagon;
+class Pentagon;
 
 class Shape {
 public: 
@@ -30,6 +30,11 @@ public:
 	virtual void VisitSquare(const Square& sq) = 0; 
 	virtual void VisitTriangle(const Triangle& tri) = 0;
 	virtual void VisitHexagon(const Hexagon& hex) = 0;
+};
+
+class ShapeVisitorWithPentagon : virtual public ShapeVisitor {
+public:
+	virtual void VisitPentagon(const Pentagon& pentagon) = 0;
 };
 
 class Square: public Shape {
@@ -59,8 +64,17 @@ public:
 	}
 };
 
+class Pentagon: public Shape {
+public:
+	Pentagon(double sidelength) : Shape(sidelength) {};
 
-class AreaVisitor : public ShapeVisitor {
+	void Accept(ShapeVisitor* visitor) {
+		ShapeVisitorWithPentagon* v = dynamic_cast<ShapeVisitorWithPentagon*>(visitor);
+		v -> VisitPentagon(*this);
+	}
+};
+
+class AreaVisitor : virtual public ShapeVisitor {
 public: 
 	double GetValForShape(const Shape& shape) {
 		return val_map[&shape];
@@ -78,11 +92,11 @@ public:
 		val_map[&hex] = hex.GetLen() * hex.GetLen() * sqrt(3)*3/2;	
 	}
 
-private:
+protected:
 	map<const Shape*, double> val_map;
 };
 
-class PerimeterVisitor : public ShapeVisitor {
+class PerimeterVisitor : virtual public ShapeVisitor {
 public: 
 	double GetValForShape(const Shape& shape) {
 		return val_map[&shape];
@@ -100,11 +114,11 @@ public:
 		val_map[&hex] = hex.GetLen()*6;	
 	}
 
-private:
+protected:
 	map<const Shape*, double> val_map;
 };
 
-class AngleVisitor : public ShapeVisitor {
+class AngleVisitor : virtual public ShapeVisitor {
 public: 
 	double GetValForShape(const Shape& shape) {
 		return val_map[&shape];
@@ -122,18 +136,39 @@ public:
 		val_map[&hex] = 120;	
 	}
 
-private:
+protected:
 	map<const Shape*, double> val_map;
+};
+
+class AreaVisitorWithPentagon: public ShapeVisitorWithPentagon, public AreaVisitor { 
+public: 
+	void VisitPentagon(const Pentagon& pent) {
+		val_map[&pent] = pent.GetLen()*pent.GetLen()*1.72;	
+	}
+};
+
+class PerimeterVisitorWithPentagon: public ShapeVisitorWithPentagon, public PerimeterVisitor { 
+public: 
+	void VisitPentagon(const Pentagon& pent) {
+		val_map[&pent] = pent.GetLen()*5;	
+	}
+};
+
+class AngleVisitorWithPentagon: public ShapeVisitorWithPentagon, public AngleVisitor { 
+public: 
+	void VisitPentagon(const Pentagon& pent) {
+		val_map[&pent] = 108;	
+	}
 };
 
 /* randomly generate a list of shapes, then process this list and compute their areas */
 int main () {
-	double avg_time = 0;
+ 	double avg_time = 0;	
 	for (int num_tests = 0; num_tests < 10; num_tests++) {	
-		time_t start = time(0);	
+		time_t start_time = time(0);	
 		vector<Shape*> shapes;
 		for (int i = 0; i < 1000000; i++) {
-			int shape_type = rand() % 3 + 1;
+			int shape_type = rand() % 4 + 1;
 			if (shape_type == 1) {
 				shapes.push_back(new Square(1));
 			}
@@ -143,11 +178,14 @@ int main () {
 			if (shape_type == 3) {
 				shapes.push_back(new Hexagon(1));
 			}
+			if (shape_type == 4) {
+				shapes.push_back(new Pentagon(1));
+			}
 		}
 		
-		AreaVisitor areav;
-		PerimeterVisitor perimeterv;
-		AngleVisitor anglev;
+		AreaVisitorWithPentagon areav;
+		PerimeterVisitorWithPentagon perimeterv;
+		AngleVisitorWithPentagon anglev;
 
 		for (int i = 0; i < 1000000; i++) {
 			Shape* curr_shape = shapes[i];
@@ -155,10 +193,11 @@ int main () {
 			curr_shape -> Accept(&perimeterv);
 			curr_shape -> Accept(&anglev);
 			
+			//cout << "Area: " << areav.GetValForShape(*curr_shape)  << " Perimeter: " << perimeterv.GetValForShape(*curr_shape) << " Angle: " << anglev.GetValForShape(*curr_shape) << endl;
 			delete curr_shape;
 		}
-		double time_passed = difftime(time(0), start);
+		double time_passed = difftime(time(0), start_time);
 		avg_time = (avg_time*num_tests + time_passed)/(num_tests + 1);
 	}
-	cout << "Average time of 10 tests: " << avg_time;
+	cout << "average time passed " << avg_time;
 }
