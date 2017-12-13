@@ -63,67 +63,67 @@ public:
 class AreaVisitor : public ShapeVisitor {
 public: 
 	double GetValForShape(const Shape& shape) {
-		return val_map[&shape];
+		return recent_val;
 	}
 
 	void VisitSquare(const Square& sq) {
-		val_map[&sq] = sq.GetLen() * sq.GetLen();
+		recent_val = sq.GetLen() * sq.GetLen();
 	}
 
 	void VisitTriangle(const Triangle& tri) {
-		val_map[&tri] = tri.GetLen() * tri.GetLen() * sqrt(3)/4;
+		recent_val = tri.GetLen() * tri.GetLen() * sqrt(3)/4;
 	}
 
 	void VisitHexagon(const Hexagon& hex) {
-		val_map[&hex] = hex.GetLen() * hex.GetLen() * sqrt(3)*3/2;	
+		recent_val = hex.GetLen() * hex.GetLen() * sqrt(3)*3/2;	
 	}
 
 private:
-	map<const Shape*, double> val_map;
+	double recent_val;
 };
 
 class PerimeterVisitor : public ShapeVisitor {
 public: 
 	double GetValForShape(const Shape& shape) {
-		return val_map[&shape];
+		return recent_val;
 	}
 
 	void VisitSquare(const Square& sq) {
-		val_map[&sq] = sq.GetLen()*4;
+		recent_val = sq.GetLen()*4;
 	}
 
 	void VisitTriangle(const Triangle& tri) {
-		val_map[&tri] = tri.GetLen()*3;
+		recent_val = tri.GetLen()*3;
 	}
 
 	void VisitHexagon(const Hexagon& hex) {
-		val_map[&hex] = hex.GetLen()*6;	
+		recent_val = hex.GetLen()*6;	
 	}
 
 private:
-	map<const Shape*, double> val_map;
+	double recent_val;
 };
 
 class AngleVisitor : public ShapeVisitor {
 public: 
 	double GetValForShape(const Shape& shape) {
-		return val_map[&shape];
+		return recent_val;
 	}
 
 	void VisitSquare(const Square& sq) {
-		val_map[&sq] = 90;
+		recent_val = 90;
 	}
 
 	void VisitTriangle(const Triangle& tri) {
-		val_map[&tri] = 60;
+		recent_val = 60;
 	}
 
 	void VisitHexagon(const Hexagon& hex) {
-		val_map[&hex] = 120;	
+		recent_val = 120;	
 	}
 
 private:
-	map<const Shape*, double> val_map;
+	double recent_val;
 };
 
 /* randomly generate a list of shapes, then process this list and compute their areas */

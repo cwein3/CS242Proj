@@ -88,7 +88,9 @@ int main () {
 		}
 		for (int i = 0; i < 1000000; i++) {
 			Shape* curr_shape = shapes[i];
-			delete curr_shape;
+		    curr_shape -> CalcArea();
+            curr_shape -> CalcPerimeter();
+            curr_shape -> CalcAngle();
 		}
 		double time_passed = difftime(time(0), start_time);
 		avg_time = (avg_time*num_tests + time_passed)/(num_tests + 1);
